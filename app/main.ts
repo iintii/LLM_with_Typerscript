@@ -80,6 +80,7 @@ async function main() {
       }
     } else {
       console.log(message.content);
+      break;
     }
 
   }
