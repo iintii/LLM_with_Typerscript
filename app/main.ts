@@ -62,7 +62,9 @@ async function main() {
     // ============================================================
     // RESPONSE HANDLING
     // ============================================================
+    
     const message = response.choices[0].message;
+    messages.push(message);
 
     if (message.tool_calls && message.tool_calls.length > 0) {
       const toolcall_function = message.tool_calls[0].function;
@@ -72,23 +74,14 @@ async function main() {
         const fileContent = fs.readFileSync(args.file_path, "utf-8");
         /* Push this OBJ to messages so LLM can read it in next ITER */
         messages.push({ 
-          "role": "tools",
-          "tool_call_id":toolcall_function.id, 
+          "role": "tool",
+          "tool_call_id":toolcall_function[0].id, 
           "content": fileContent });
       }
     } else {
       console.log(message.content);
     }
 
-    // ============================================================
-    // MEMORY UPDATE
-    // ============================================================
-    messages.push(message);
-
-    if (!message.tool_calls && message.tool_calls === 0) {
-      console.log(message.content);
-      break;
-    }
   }
 
 }
