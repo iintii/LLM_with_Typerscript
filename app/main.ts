@@ -75,7 +75,7 @@ async function main() {
         /* Push this OBJ to messages so LLM can read it in next ITER */
         messages.push({ 
           "role": "tool",
-          "tool_call_id":toolcall_function[0].id, 
+          "tool_call_id":message.tool_calls[0].id, 
           "content": fileContent });
       }
     } else {
