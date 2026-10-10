@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import fs from "fs";
 
 async function main() {
   const [, , flag, prompt] = process.argv;
@@ -51,6 +52,22 @@ async function main() {
 
   // TODO: Uncomment the lines below to pass the first stage
   console.log(response.choices[0].message.content); 
+
+  /*  */
+  const message = response.choices[0].message
+  if (message.tool_calls && message.tool_calls.length > 0){
+    
+    const toolcall_function = message.tool_calls[0].function;
+    if (toolcall_function.name === "Read"){
+      const args = JSON.parse(toolcall_function.arguments)
+      const fileContent = fs.readFileSync(args.file_path, "utf-8");
+      console.log(fileContent);
+    }
+    
+  } else {
+    console.log(message.content)
+  }
+  
 }
 
 main();
