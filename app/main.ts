@@ -18,8 +18,8 @@ async function main() {
   }
 
   const client = new OpenAI({
-    apiKey: apiKey,
-    baseURL: baseURL,
+    apiKey,
+    baseURL,
   });
 
   // ============================================================
@@ -33,7 +33,7 @@ async function main() {
   while (true) {
     const response = await client.chat.completions.create({
       model: "anthropic/claude-haiku-4.5",
-      messages: messages,
+      messages,
       tools: [
         {
           type: "function",
@@ -52,6 +52,27 @@ async function main() {
             },
           },
         },
+        {
+          type: "function",
+          function: {
+            name: "Write",
+            description: "Write content to a file",
+            parameters: {
+              type: "object",
+              required: ["file_path", "content"],
+              properties: {
+                file_path: {
+                  type: "string",
+                  description: "The path of the file to write to",
+                },
+                content: {
+                  type: "string",
+                  description: "The content to write to the file",
+                },
+              },
+            },
+          },
+        },
       ],
     });
 
@@ -62,29 +83,38 @@ async function main() {
     // ============================================================
     // RESPONSE HANDLING
     // ============================================================
-    
     const message = response.choices[0].message;
     messages.push(message);
 
     if (message.tool_calls && message.tool_calls.length > 0) {
-      const toolcall_function = message.tool_calls[0].function;
+      const toolCallFunction = message.tool_calls[0].function;
 
-      if (toolcall_function.name === "Read") {
-        const args = JSON.parse(toolcall_function.arguments);
+      if (toolCallFunction.name === "Read") {
+        const args = JSON.parse(toolCallFunction.arguments);
         const fileContent = fs.readFileSync(args.file_path, "utf-8");
-        /* Push this OBJ to messages so LLM can read it in next ITER */
-        messages.push({ 
-          "role": "tool",
-          "tool_call_id":message.tool_calls[0].id, 
-          "content": fileContent });
+
+        messages.push({
+          role: "tool",
+          tool_call_id: message.tool_calls[0].id,
+          content: fileContent,
+        });
+      }else if (toolCallFunction.name === "Write"){
+        const args = JSON.parse(toolCallFunction.arguments);
+        fs.writeFileSync(args.file_path, args.content);
+
+        messages.push({
+          role: "tool",
+          tool_call_id: message.tool_calls[0].id,
+          content: `File ${args.file_path} written successfully.`
+        })
       }
+
+
     } else {
       console.log(message.content);
       break;
     }
-
   }
-
 }
 
 main();
