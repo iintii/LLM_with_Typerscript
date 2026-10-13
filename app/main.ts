@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import fs from "fs";
-
+import { execSync } from "child_process";
 // ============================================================
 // SETUP
 // ============================================================
@@ -144,7 +144,4 @@ async function main() {
 }
 
 main();
-function execSync(command: any, arg1: { encoding: string; }) {
-  throw new Error("Function not implemented.");
-}
 
