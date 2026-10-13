@@ -144,3 +144,7 @@ async function main() {
 }
 
 main();
+function execSync(command: any, arg1: { encoding: string; }) {
+  throw new Error("Function not implemented.");
+}
+
