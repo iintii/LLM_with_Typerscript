@@ -73,6 +73,23 @@ async function main() {
             },
           },
         },
+        {
+          type: "function",
+          function: {
+            name: "Bash",
+            description: "Execute a shell command",
+            parameters: {
+              type: "object",
+              required: ["command"],
+              properties: {
+                command: {
+                  type: "string",
+                  description: "The command to execute",
+                },
+              },
+            },
+          },
+        },
       ],
     });
 
@@ -98,17 +115,26 @@ async function main() {
           tool_call_id: message.tool_calls[0].id,
           content: fileContent,
         });
-      }else if (toolCallFunction.name === "Write"){
+      } else if (toolCallFunction.name === "Write") {
         const args = JSON.parse(toolCallFunction.arguments);
         fs.writeFileSync(args.file_path, args.content);
 
         messages.push({
           role: "tool",
           tool_call_id: message.tool_calls[0].id,
-          content: `File ${args.file_path} written successfully.`
-        })
-      }
+          content: `File ${args.file_path} written successfully.`,
+        });
+      } else if (toolCallFunction.name === "Bash") {
+        const args = JSON.parse(toolCallFunction.arguments);
 
+        const output = execSync(args.command, { encoding: "utf-8" });
+
+        messages.push({
+          role: "tool",
+          tool_call_id: message.tool_calls[0].id,
+          content: output,
+        });
+      }
 
     } else {
       console.log(message.content);
