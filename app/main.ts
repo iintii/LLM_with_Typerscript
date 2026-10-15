@@ -26,6 +26,35 @@ async function main() {
   // STATE
   // ============================================================
   const messages = [{ role: "user", content: prompt }];
+  
+  // ============================================================
+  // Skill Definitions
+  // ============================================================
+  if (fs.existsSync(".claude/skills")){
+    // read folder parse and build string
+
+    const systemprompt = fs.readdirSync(".claude/skills", {withFIleTypes: true}).map((file) => {
+      const skillMDPath = `.claude/skills/${file.name}/skill.md`;
+      if (!fs.existSync(skillMDPath)) return null;
+
+      const skillMD = fs.readFileSync(skillMDPath, "utf-8");
+
+      const parts = skillMD.split("---")
+
+      if (parts.length < 3) return null;
+
+      const skillName = parts[1].trim();
+      const skillDescription = parts[2].trim();
+
+      return `Skill: ${skillName}\nDescription: ${skillDescription}`;
+      }).filter(Boolean).join("\n\n");
+      
+    //unshift
+    messages.unshift({
+      role: "system",
+      content: systemprompt
+    })
+  }
 
   // ============================================================
   // AGENT LOOP
