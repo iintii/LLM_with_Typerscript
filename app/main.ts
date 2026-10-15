@@ -30,30 +30,46 @@ async function main() {
   // ============================================================
   // Skill Definitions
   // ============================================================
-  if (fs.existsSync(".claude/skills")){
-    // read folder parse and build string
+  // ============================================================
+  // Skill Definitions
+  // ============================================================
+  if (fs.existsSync(".claude/skills")) {
+    const skillsList = fs
+      .readdirSync(".claude/skills", { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory())
+      .map((folder) => {
+        const skillMDPath = `.claude/skills/${folder.name}/SKILL.md`;
 
-    const systemprompt = fs.readdirSync(".claude/skills", {withFIleTypes: true}).map((file) => {
-      const skillMDPath = `.claude/skills/${file.name}/skill.md`;
-      
+        if (!fs.existsSync(skillMDPath)) return null;
 
-      const skillMD = fs.readFileSync(skillMDPath, "utf-8");
+        const skillMD = fs.readFileSync(skillMDPath, "utf-8");
+        const parts = skillMD.split("---");
 
-      const parts = skillMD.split("---")
+        if (parts.length < 3) return null;
 
-      if (parts.length < 3) return null;
+        const frontmatter = parts[1];
+        
+        // Extract using regex
+        const nameMatch = frontmatter.match(/name:\s*(.+)/);
+        const descMatch = frontmatter.match(/description:\s*(.+)/);
 
-      const skillName = parts[1].trim();
-      const skillDescription = parts[2].trim();
+        if (nameMatch && descMatch) {
+          const skillName = nameMatch[1].trim();
+          const skillDesc = descMatch[1].trim();
+          return `- ${skillName}: ${skillDesc}`;
+        }
 
-      return `Skill: ${skillName}\nDescription: ${skillDescription}`;
-      }).filter(Boolean).join("\n\n");
+        return null;
+      })
+      .filter(Boolean)
+      .join("\n");
 
-    //unshift
-    messages.unshift({
-      role: "system",
-      content: systemprompt
-    })
+    if (skillsList) {
+      messages.unshift({
+        role: "system",
+        content: `You have access to the following skills:\n\n${skillsList}`
+      });
+    }
   }
 
   // ============================================================
