@@ -35,7 +35,7 @@ async function main() {
 
     const systemprompt = fs.readdirSync(".claude/skills", {withFIleTypes: true}).map((file) => {
       const skillMDPath = `.claude/skills/${file.name}/skill.md`;
-      if (!fs.existSync(skillMDPath)) return null;
+      
 
       const skillMD = fs.readFileSync(skillMDPath, "utf-8");
 
@@ -48,7 +48,7 @@ async function main() {
 
       return `Skill: ${skillName}\nDescription: ${skillDescription}`;
       }).filter(Boolean).join("\n\n");
-      
+
     //unshift
     messages.unshift({
       role: "system",
