@@ -29,7 +29,7 @@ async function main() {
     const filePath = prompt.slice(1)
     const skillpath = `.claude/skills/${filePath}/SKILL.md`
 
-    if (fs.existSync(skillpath)) {
+    if (fs.existsSync(skillpath)) {
       const readSkilldile = fs.readFileSync(skillpath, "utf-8");
       const splitFile = readSkilldile.split("---");
 
