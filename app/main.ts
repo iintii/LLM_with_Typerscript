@@ -5,7 +5,7 @@ import { execSync } from "child_process";
 // SETUP
 // ============================================================
 async function main() {
-  const [, , flag, prompt] = process.argv;
+  let [, , flag, prompt] = process.argv;
   const apiKey = process.env.OPENROUTER_API_KEY;
   const baseURL =
     process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
@@ -27,14 +27,14 @@ async function main() {
   // ============================================================
   if(prompt.startsWith("/")) {
     const filePath = prompt.slice(1)
-    const skillpath = `.claude/skills/${filePath}/SKILLS.md`
+    const skillpath = `.claude/skills/${filePath}/SKILL.md`
 
-    if (fs.execSync(skillpath)) {
+    if (fs.existSync(skillpath)) {
       const readSkilldile = fs.readFileSync(skillpath, "utf-8");
       const splitFile = readSkilldile.split("---");
 
       if(splitFile.length >= 3){
-        const prompt = splitFile[2].trim();
+        prompt = splitFile[2].trim();
       }
     }
   }
