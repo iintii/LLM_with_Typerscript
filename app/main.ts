@@ -25,6 +25,19 @@ async function main() {
   // ============================================================
   // STATE
   // ============================================================
+  if(prompt.startsWith("/")) {
+    const filePath = prompt.slice(1)
+    const skillpath = `.claude/skills/${filePath}/SKILLS.md`
+
+    if (fs.execSync(skillpath)) {
+      const readSkilldile = fs.readFileSync(skillpath, "utf-8");
+      const splitFile = readSkilldile.split("---");
+
+      if(splitFile.length >= 3){
+        const prompt = splitFile[2].trim();
+      }
+    }
+  }
   const messages = [{ role: "user", content: prompt }];
   
   // ============================================================
