@@ -25,16 +25,28 @@ async function main() {
   // ============================================================
   // STATE
   // ============================================================
-  if(prompt.startsWith("/")) {
-    const filePath = prompt.slice(1)
-    const skillpath = `.claude/skills/${filePath}/SKILL.md`
+  if (prompt.startsWith("/")) {
+    // 1. Split the input into the skill name and the arguments
+    const parts = prompt.trim().split(/\s+/);
+    const skillName = parts[0].substring(1); // e.g., "apple"
+    const args = parts.slice(1);             // e.g., ["staging", "eu-west"]
+    
+    const skillpath = `.claude/skills/${skillName}/SKILL.md`;
 
     if (fs.existsSync(skillpath)) {
       const readSkilldile = fs.readFileSync(skillpath, "utf-8");
       const splitFile = readSkilldile.split("---");
 
-      if(splitFile.length >= 3){
-        prompt = splitFile[2].trim();
+      if (splitFile.length >= 3) {
+        const rawBody = splitFile[2].trim();
+        const allArgs = args.join(" ");
+        
+        // 2. Substitute the placeholders in the raw body
+        prompt = rawBody.replace(/\$ARGUMENTS\[(\d+)\]|\$ARGUMENTS|\$(\d+)/g, (match, idx1, idx2) => {
+          if (match === "$ARGUMENTS") return allArgs;
+          const index = idx1 !== undefined ? idx1 : idx2;
+          return args[Number(index)] || "";
+        });
       }
     }
   }
